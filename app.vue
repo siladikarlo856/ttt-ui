@@ -1,6 +1,7 @@
+<script setup lang="ts"></script>
+
 <template>
-  <div>
-    <div class="p-6 text-green-500">Hello Nuxt</div>
-    <Button label="Primevue button" />
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
