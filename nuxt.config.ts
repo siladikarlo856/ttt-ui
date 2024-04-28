@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devServer: {
     port: 8080,
   },
-  modules: ["@nuxtjs/tailwindcss", "nuxt-primevue"],
+  modules: ["@nuxtjs/tailwindcss", "nuxt-primevue", "@pinia/nuxt"],
   primevue: {
     options: {
       ripple: true,
