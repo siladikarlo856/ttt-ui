@@ -6,7 +6,7 @@ export default defineNuxtConfig({
         {
           id: "theme-link",
           rel: "stylesheet",
-          href: "http://localhost:8080/" + "themes/md-light-indigo/theme.css",
+          href: "http://localhost:8080/" + "themes/md-dark-indigo/theme.css",
         },
       ],
     },
