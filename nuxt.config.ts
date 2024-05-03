@@ -15,11 +15,15 @@ export default defineNuxtConfig({
   devServer: {
     port: 8080,
   },
+  routeRules: {
+    "/api/**": { proxy: "http://localhost:3000/**" },
+  },
   modules: [
     "@nuxtjs/tailwindcss",
     "nuxt-primevue",
     "@pinia/nuxt",
     "@vueuse/nuxt",
+    "@vee-validate/nuxt",
   ],
   primevue: {
     options: {

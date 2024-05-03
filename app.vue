@@ -7,3 +7,9 @@ const darkModeStore = useDarkModeStore();
     <NuxtPage />
   </NuxtLayout>
 </template>
+
+<style>
+.error-message {
+  @apply text-danger h-6;
+}
+</style>
