@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { jwtDecode } from "jwt-decode";
 
 interface UserPayloadInterface {
   email: string;
@@ -10,11 +11,24 @@ interface SigninResponse {
   refreshToken: string;
 }
 
+interface User {
+  playerId: string;
+  email: string;
+}
+
 export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false);
   const isLoading = ref(false);
+  const user = ref<User>();
 
   const toast = useToast();
+
+  // on create
+  const accessToken = useCookie("accessToken");
+  if (accessToken.value) {
+    user.value = jwtDecode(accessToken.value);
+    isAuthenticated.value = true;
+  }
 
   async function authenticateUser({ email, password }: UserPayloadInterface) {
     isLoading.value = true;
@@ -34,8 +48,8 @@ export const useAuthStore = defineStore("auth", () => {
       refreshToken.value = data.value?.refreshToken;
 
       isAuthenticated.value = true;
+      user.value = jwtDecode(data?.value?.accessToken);
     } else {
-      console.log(JSON.stringify(error.value));
       toast.add({
         severity: "error",
         summary: "Error",
@@ -56,6 +70,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   return {
+    user,
     isAuthenticated,
     isLoading,
     authenticateUser,

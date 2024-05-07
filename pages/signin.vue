@@ -32,7 +32,6 @@ const [password, passwordAttrs] = defineField("password", {
 });
 
 const onSubmit = handleSubmit((values) => {
-  console.log(values);
   authenticateUser({ email: values.email, password: values.password });
 
   if (isAuthenticated.value) {

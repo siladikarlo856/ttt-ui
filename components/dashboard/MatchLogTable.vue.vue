@@ -10,6 +10,10 @@ export interface MatchDto {
 
 defineProps<{ matches: MatchDto[] }>();
 
+defineEmits<{
+  addMatch: [void];
+}>();
+
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("hr-HR", {
     day: "2-digit",
@@ -25,7 +29,7 @@ function formatDate(value: string) {
       <p class="text-xl flex items-center">
         <i class="pi pi-list mr-3"></i>Matches
       </p>
-      <Button icon="pi pi-plus" label="Add Match" />
+      <Button icon="pi pi-plus" label="Add Match" @click="$emit('addMatch')" />
     </div>
     <div class="flex-grow">
       <DataTable
