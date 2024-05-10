@@ -1,0 +1,7 @@
+.dockerignore
+/.nuxt
+/.output
+/node_modules # FIXME: check why is this required
+
+.gitignore
+README.md

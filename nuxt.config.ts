@@ -6,7 +6,9 @@ export default defineNuxtConfig({
         {
           id: "theme-link",
           rel: "stylesheet",
-          href: "http://localhost:8080/" + "themes/md-dark-indigo/theme.css",
+          href:
+            (process.env.BASE_URL || "http://localhost:8080/") +
+            "themes/md-dark-indigo/theme.css",
         },
       ],
     },
@@ -16,7 +18,9 @@ export default defineNuxtConfig({
     port: 8080,
   },
   routeRules: {
-    "/api/**": { proxy: "http://localhost:3000/**" },
+    "/api/**": {
+      proxy: process.env.API_URL || "http://localhost:3000/**",
+    },
   },
   modules: [
     "@nuxtjs/tailwindcss",

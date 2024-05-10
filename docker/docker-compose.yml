@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  nuxt:
+    # image: ttt-ui:latest-production
+    container_name: ttt-ui-container
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      args:
+        IMAGE_NAME: ttt-ui-image
+    ports:
+      - 8080:8080
+    networks:
+      - ttt-network
+
+networks:
+  ttt-network:
+    external: true
+    name: custom_network

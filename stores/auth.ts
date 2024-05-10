@@ -33,11 +33,10 @@ export const useAuthStore = defineStore("auth", () => {
   async function authenticateUser({ email, password }: UserPayloadInterface) {
     isLoading.value = true;
 
-    const { data, error } = await useFetch<SigninResponse>("api/auth/signin", {
+    const { data, error } = await useFetch<SigninResponse>("/api/auth/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: { email, password },
-      server: false,
     });
 
     if (data.value) {
@@ -50,6 +49,7 @@ export const useAuthStore = defineStore("auth", () => {
       isAuthenticated.value = true;
       user.value = jwtDecode(data?.value?.accessToken);
     } else {
+      console.log("aaaa", data, error);
       toast.add({
         severity: "error",
         summary: "Error",
