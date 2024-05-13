@@ -1,0 +1,31 @@
+name: TTT UI Docker Image CI
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build --tag ttt-ui:latest . -f ./docker/Dockerfile --build-arg API_URL=${{ secrets.API_URL }} --build-arg BASE_URL=${{ secrets.BASE_URL }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: jwalton/gh-ecr-login@v1
+        with:
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: eu-north-1
+
+      - name: Push to ECR
+        id: ecr-push
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: eu-north-1
+          image: ttt-ui:latest
