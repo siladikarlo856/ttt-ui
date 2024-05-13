@@ -53,6 +53,7 @@ jobs:
         run: |
           echo "Starting Deploy"
           instance_ids=$(aws ec2 describe-instances --filters "Name=tag:Service,Values=ttt-ui" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].[InstanceId]' --output text)
+          echo "Instance IDs: $instance_ids"
           for instance in $instance_ids; do
             instance_status=$(aws ec2 describe-instances --instance-ids $instance --query 'Reservations[*].Instances[*].State.Name' --output text)
             echo "Instance Status: $instance_status"
