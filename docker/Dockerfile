@@ -14,7 +14,11 @@ RUN npm install --production=false
 
 COPY . .
 
-ARG API_URL="http://13.53.38.215/**"
+ARG API_URL
+ARG BASE_URL
+
+ENV API_URL=${API_URL}
+ENV BASE_URL=${BASE_URL}
 
 RUN npm run generate
 RUN npm prune
