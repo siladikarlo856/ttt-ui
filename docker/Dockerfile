@@ -29,5 +29,5 @@ FROM nginx:stable-alpine-slim as production
 COPY --from=build /src/.output/public /usr/share/nginx/html
 COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 8080
+EXPOSE 80
 

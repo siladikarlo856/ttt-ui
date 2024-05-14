@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  nuxt:
+  nuxt-app:
     # image: ttt-ui:latest-production
     container_name: ttt-ui-container
     build:
@@ -9,12 +9,12 @@ services:
       dockerfile: docker/Dockerfile
       args:
         IMAGE_NAME: ttt-ui-image
+    restart: always
     ports:
-      - 8080:8080
+      - 80:80
     networks:
-      - ttt-network
+      - nuxt-network
 
 networks:
-  ttt-network:
-    external: true
-    name: custom_network
+  nuxt-network:
+    driver: bridge
