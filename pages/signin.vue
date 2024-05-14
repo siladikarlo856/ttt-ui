@@ -31,8 +31,8 @@ const [password, passwordAttrs] = defineField("password", {
   validateOnBlur: true,
 });
 
-const onSubmit = handleSubmit((values) => {
-  authenticateUser({ email: values.email, password: values.password });
+const onSubmit = handleSubmit(async (values) => {
+  await authenticateUser({ email: values.email, password: values.password });
 
   if (isAuthenticated.value) {
     router.push("/");
