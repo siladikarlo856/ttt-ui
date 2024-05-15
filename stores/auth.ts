@@ -20,16 +20,27 @@ export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false);
   const isLoading = ref(false);
   const user = ref<User>();
+  const refreshTokenTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
   const toast = useToast();
 
-  // on create
+  // ON CREATE
+  console.log("on create auth store");
+
+  const refreshToken = useCookie("refreshToken");
   const accessToken = useCookie("accessToken");
+
   if (accessToken.value) {
     user.value = jwtDecode(accessToken.value);
     isAuthenticated.value = true;
   }
 
+  if (refreshToken.value) {
+    // refresh token
+    console.log("refresh token", jwtDecode(refreshToken.value));
+  }
+
+  // FUNCTIONS
   async function authenticateUser({ email, password }: UserPayloadInterface) {
     isLoading.value = true;
 
@@ -48,8 +59,8 @@ export const useAuthStore = defineStore("auth", () => {
 
       isAuthenticated.value = true;
       user.value = jwtDecode(data?.value?.accessToken);
+      console.log("user", user.value);
     } else {
-      console.log("aaaa", data, error);
       toast.add({
         severity: "error",
         summary: "Error",
@@ -67,6 +78,27 @@ export const useAuthStore = defineStore("auth", () => {
     accessToken.value = null;
     refreshToken.value = null;
     isAuthenticated.value = false;
+  }
+
+  async function refreshAccessToken() {
+    const { data } = await useFetch<{ accessToken: string }>(
+      "/api/auth/refresh",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: { refreshToken: refreshToken.value },
+      }
+    );
+
+    if (data.value && data.value.accessToken) {
+      accessToken.value = data.value.accessToken;
+      refreshTokenTimeout.value = setTimeout(
+        refreshAccessToken,
+        1000 * 60 * 15
+      );
+    } else {
+      logUserOut();
+    }
   }
 
   return {
