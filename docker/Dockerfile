@@ -16,6 +16,12 @@ RUN npm install --production=false
 
 COPY . .
 
+ARG API_URL
+ARG BASE_URL
+
+ENV API_URL=${API_URL}
+ENV BASE_URL=${BASE_URL}
+
 RUN npm run build
 RUN npm prune
 
