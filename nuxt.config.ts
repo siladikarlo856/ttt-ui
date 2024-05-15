@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  ssr: false,
   app: {
     head: {
       link: [
@@ -28,6 +29,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@vueuse/nuxt",
     "@vee-validate/nuxt",
+    "@nuxtjs/color-mode",
   ],
   primevue: {
     options: {
@@ -36,4 +38,8 @@ export default defineNuxtConfig({
     cssLayerOrder: "tailwind-base, primevue, tailwind-utilities",
   },
   css: ["~/assets/css/tailwind.css", "primeicons/primeicons.css"],
+
+  colorMode: {
+    classSuffix: "", // disable the default '-mode' suffix
+  },
 });

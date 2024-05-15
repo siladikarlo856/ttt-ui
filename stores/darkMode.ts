@@ -1,20 +1,30 @@
-import { ref } from "vue";
 import { defineStore } from "pinia";
-import { useLocalStorage } from "@vueuse/core";
 import { usePrimeVue } from "primevue/config";
+import { useLocalStorage } from "@vueuse/core";
 
 export const useDarkModeStore = defineStore("darkMode", () => {
-  const darkMode = useLocalStorage("darkMode", ref(true));
+  const colorMode = useColorMode();
   const PrimeVue = usePrimeVue();
 
+  const storedColorMode = useLocalStorage("color-mode", "system");
+
+  const isDarkMode = ref<boolean>(storedColorMode.value === "dark");
+
+  console.log("isDarkMode", isDarkMode.value, storedColorMode.value);
+
   function toggleDarkMode() {
-    darkMode.value = !darkMode.value;
-    document?.documentElement.classList.toggle("dark", darkMode.value);
-    setTheme(darkMode.value);
+    isDarkMode.value = !isDarkMode.value;
+    setColorMode();
   }
 
-  function setTheme(isDarkMode: boolean) {
-    if (isDarkMode) {
+  function setColorMode() {
+    colorMode.preference = isDarkMode.value ? "dark" : "light";
+    storedColorMode.value = colorMode.preference;
+    setTheme();
+  }
+
+  function setTheme() {
+    if (colorMode.preference === "dark") {
       PrimeVue.changeTheme("md-light-indigo", "md-dark-indigo", "theme-link");
     } else {
       PrimeVue.changeTheme("md-dark-indigo", "md-light-indigo", "theme-link");
@@ -22,8 +32,19 @@ export const useDarkModeStore = defineStore("darkMode", () => {
   }
 
   onMounted(() => {
-    document?.documentElement?.classList.toggle("dark", darkMode.value);
-    setTheme(darkMode.value);
+    if (storedColorMode.value === "system") {
+      const prefersDarkColorScheme = () =>
+        window &&
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefersDarkColorScheme()) {
+        isDarkMode.value = true;
+        colorMode.preference = "dark";
+      }
+    }
+    setTheme();
   });
-  return { darkMode, toggleDarkMode };
+
+  console.log("storedColorMode", storedColorMode.value);
+  return { isDarkMode, setColorMode, toggleDarkMode };
 });
