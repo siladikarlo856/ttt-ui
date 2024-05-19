@@ -14,6 +14,8 @@ interface SigninResponse {
 interface User {
   playerId: string;
   email: string;
+  firstName: string;
+  lastName: string;
 }
 
 export const useAuthStore = defineStore("auth", () => {
@@ -24,21 +26,8 @@ export const useAuthStore = defineStore("auth", () => {
 
   const toast = useToast();
 
-  // ON CREATE
-  console.log("on create auth store");
-
   const refreshToken = useCookie("refreshToken");
   const accessToken = useCookie("accessToken");
-
-  if (accessToken.value) {
-    user.value = jwtDecode(accessToken.value);
-    isAuthenticated.value = true;
-  }
-
-  if (refreshToken.value) {
-    // refresh token
-    console.log("refresh token", jwtDecode(refreshToken.value));
-  }
 
   // FUNCTIONS
   async function authenticateUser({ email, password }: UserPayloadInterface) {
@@ -51,15 +40,10 @@ export const useAuthStore = defineStore("auth", () => {
     });
 
     if (data.value) {
-      const accessToken = useCookie("accessToken");
-      const refreshToken = useCookie("refreshToken");
-
       accessToken.value = data.value?.accessToken;
       refreshToken.value = data.value?.refreshToken;
-
       isAuthenticated.value = true;
-      user.value = jwtDecode(data?.value?.accessToken);
-      console.log("user", user.value);
+      startRefreshAccessTokenTimer();
     } else {
       toast.add({
         severity: "error",
@@ -70,6 +54,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     isLoading.value = false;
+    getUser();
   }
 
   function logUserOut() {
@@ -78,6 +63,8 @@ export const useAuthStore = defineStore("auth", () => {
     accessToken.value = null;
     refreshToken.value = null;
     isAuthenticated.value = false;
+    user.value = undefined;
+    stopRefreshTokenTimer();
   }
 
   async function refreshAccessToken() {
@@ -92,13 +79,60 @@ export const useAuthStore = defineStore("auth", () => {
 
     if (data.value && data.value.accessToken) {
       accessToken.value = data.value.accessToken;
-      refreshTokenTimeout.value = setTimeout(
-        refreshAccessToken,
-        1000 * 60 * 15
-      );
+      startRefreshAccessTokenTimer();
     } else {
       logUserOut();
     }
+  }
+
+  async function getUser() {
+    const { data, status } = await useFetch<User>("/api/auth/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`,
+      },
+      server: false,
+    });
+
+    if (status.value === "success") {
+      user.value = data.value!;
+    } else {
+      logUserOut();
+    }
+  }
+
+  function startRefreshAccessTokenTimer() {
+    if (!accessToken.value || !refreshToken.value) {
+      logUserOut();
+    }
+
+    const refreshTokenExpires = jwtDecode(refreshToken.value ?? "").exp ?? 0;
+    if (new Date(refreshTokenExpires * 1000).getTime() < Date.now()) {
+      logUserOut();
+      return;
+    }
+
+    const token = jwtDecode(accessToken.value ?? "");
+    // set at timeout a minute before the token expires
+    const timeout =
+      new Date((token.exp ?? 0) * 1000).getTime() - Date.now() - 1000 * 60;
+    if (timeout < 0) {
+      refreshAccessToken();
+      return;
+    }
+
+    refreshTokenTimeout.value = setTimeout(refreshAccessToken, timeout);
+  }
+
+  function stopRefreshTokenTimer() {
+    clearTimeout(refreshTokenTimeout.value!);
+  }
+
+  // ON CREATE
+  if (accessToken.value) {
+    isAuthenticated.value = true;
+    startRefreshAccessTokenTimer();
+    getUser();
   }
 
   return {

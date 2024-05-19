@@ -1,18 +1,25 @@
 <script setup lang="ts">
 import { onClickOutside } from "@vueuse/core";
 
-const { logUserOut } = useAuthStore();
+const authStore = useAuthStore();
 const router = useRouter();
 
 const target = ref(null);
 const dropdownOpen = ref(false);
+
+const userInitials = computed(() => {
+  return (
+    (authStore.user?.firstName?.[0] ?? "") +
+    (authStore.user?.lastName?.[0] ?? "")
+  );
+});
 
 onClickOutside(target, () => {
   dropdownOpen.value = false;
 });
 
 function logout() {
-  logUserOut();
+  authStore.logUserOut();
   dropdownOpen.value = false;
   router.push("/signin");
 }
@@ -27,16 +34,11 @@ function logout() {
     >
       <span class="hidden text-right lg:block">
         <span class="block text-sm font-medium text-black dark:text-white"
-          >Karlo Siladi</span
+          >{{ authStore.user?.firstName }} {{ authStore.user?.lastName }}</span
         >
       </span>
 
-      <div
-        class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-black"
-      >
-        <span class="font-medium text-gray-600 dark:text-gray-300">KS</span>
-      </div>
-
+      <Avatar v-if="userInitials" :label="userInitials" />
       <svg
         :class="dropdownOpen && 'rotate-180'"
         class="hidden fill-current sm:block"

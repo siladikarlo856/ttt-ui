@@ -7,11 +7,9 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-      args:
-        IMAGE_NAME: ttt-ui-image
     restart: always
     ports:
-      - 80:80
+      - 3050:3000
     networks:
       - nuxt-network
 

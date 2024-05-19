@@ -10,8 +10,6 @@ export const useDarkModeStore = defineStore("darkMode", () => {
 
   const isDarkMode = ref<boolean>(storedColorMode.value === "dark");
 
-  console.log("isDarkMode", isDarkMode.value, storedColorMode.value);
-
   function toggleDarkMode() {
     isDarkMode.value = !isDarkMode.value;
     setColorMode();
@@ -45,6 +43,5 @@ export const useDarkModeStore = defineStore("darkMode", () => {
     setTheme();
   });
 
-  console.log("storedColorMode", storedColorMode.value);
   return { isDarkMode, setColorMode, toggleDarkMode };
 });

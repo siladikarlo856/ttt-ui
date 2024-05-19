@@ -25,11 +25,17 @@ function formatDate(value: string) {
 
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex justify-between py-3">
+    <div class="flex justify-between">
       <p class="text-xl flex items-center">
         <i class="pi pi-list mr-3"></i>Matches
       </p>
-      <Button icon="pi pi-plus" label="Add Match" @click="$emit('addMatch')" />
+      <Button
+        icon="pi pi-plus"
+        size="small"
+        label="Add Match"
+        text
+        @click="$emit('addMatch')"
+      />
     </div>
     <div class="flex-grow">
       <DataTable

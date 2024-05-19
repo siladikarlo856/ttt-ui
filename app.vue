@@ -6,6 +6,7 @@ const darkModeStore = useDarkModeStore();
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <Toast />
 </template>
 
 <style>
