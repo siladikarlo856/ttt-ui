@@ -123,12 +123,13 @@ const onSaveClick = handleSubmit(async (values) => {
   <Dialog
     :visible="visible"
     header="Add New Match"
+    class="w-[90%] md:w-auto"
     @update:visible="$emit('update:visible', $event)"
     @show="getCurrentDate"
     @hide="onHide"
   >
     <form class="grid gap-4 pt-5">
-      <div class="grid grid-cols-[2fr_1fr] gap-4">
+      <div class="grid md:grid-cols-[2fr_1fr] grid-cols-[1fr] gap-4">
         <div class="flex flex-col items-start gap-2">
           <label for="homePlayer">You</label>
           <Dropdown
