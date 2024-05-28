@@ -27,4 +27,12 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+
+  .fullscreen-dialog {
+    @apply transition-none transform-none w-full h-screen max-h-full top-0 left-0 grow;
+
+    .p-dialog-content {
+      @apply flex-grow;
+    }
+  }
 }

@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import CreateMatchDialog from "~/components/dashboard/CreateMatchDialog.vue";
-import CreatePlayerDialog from "~/components/dashboard/CreatePlayerDialog.vue";
 import type { MatchDto } from "~/components/dashboard/MatchLogTable.vue";
 import MatchLogTable from "~/components/dashboard/MatchLogTable.vue";
 
 const isCreateMatchDialogVisible = ref(false);
-const isCreatePlayerDialogVisible = ref(false);
 
 const { data: matches, execute: getMatches } = await useFetch<MatchDto[]>(
   "api/matches",
@@ -34,25 +32,13 @@ const { data: players, execute: getPlayers } = await useFetch<SelectOption[]>(
 function onAddMatchClick() {
   isCreateMatchDialogVisible.value = true;
 }
-
-function handleClickAddPlayer() {
-  isCreatePlayerDialogVisible.value = true;
-}
-
-function onPlayerCreated() {
-  getPlayers();
-}
 </script>
 <template>
   <MatchLogTable :matches="matches ?? []" @add-match="onAddMatchClick" />
   <CreateMatchDialog
     v-model:visible="isCreateMatchDialogVisible"
     :players="players ?? []"
-    @click:add-player="handleClickAddPlayer"
     @created:match="getMatches"
-  />
-  <CreatePlayerDialog
-    v-model:visible="isCreatePlayerDialogVisible"
-    @created:player="onPlayerCreated"
+    @created:player="getPlayers"
   />
 </template>

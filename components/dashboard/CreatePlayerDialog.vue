@@ -69,7 +69,8 @@ const onSubmit = handleSubmit(async (values) => {
   <Dialog
     header="Add New Player"
     :visible="visible"
-    :baseZIndex="1"
+    :baseZIndex="9000"
+    class="fullscreen-dialog"
     @update:visible="$emit('update:visible', $event)"
     @hide="resetForm"
   >
