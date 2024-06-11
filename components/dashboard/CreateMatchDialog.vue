@@ -4,10 +4,12 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useAuthStore } from "~/stores/auth";
 import CreatePlayerDialog from "./CreatePlayerDialog.vue";
 import CreateSetsDialog from "./CreateSetsDialog.vue";
+import type { MatchDto } from "./MatchLogTable.vue";
 
 const props = defineProps<{
   visible: boolean;
-  players: SelectOption[] | undefined;
+  players?: SelectOption[] | undefined;
+  matchId?: string;
 }>();
 
 const emit = defineEmits<{
@@ -24,7 +26,13 @@ const toast = useToast();
 const isCreatePlayerDialogVisible = ref(false);
 const isCreateSetsDialogVisible = ref(false);
 
-const { handleSubmit, errors, defineField, resetForm } = useForm({
+const isEditMode = computed(() => !!props.matchId);
+const submitButtonText = computed(() => (isEditMode.value ? "Update" : "Save"));
+const toastSuccessMessage = computed(() =>
+  isEditMode.value ? "Match log is updated." : "Match log is created."
+);
+
+const { handleSubmit, errors, defineField, resetForm, meta } = useForm({
   validationSchema: toTypedSchema(
     z.object({
       date: z.date(),
@@ -113,7 +121,7 @@ function onHide() {
   resetForm();
 }
 
-function getCurrentDate() {
+function setCurrentDate() {
   date.value = new Date();
 }
 
@@ -121,7 +129,19 @@ interface setDto {
   homePlayerPoints: number;
   awayPlayerPoints: number;
 }
-const onSaveClick = handleSubmit(async (values) => {
+
+const onSubmit = handleSubmit(async (values) => {
+  if (!meta.value.dirty) {
+    console.log("No changes");
+    toast.add({
+      severity: "info",
+      summary: "No changes",
+      detail: "No changes detected.",
+      life: 3000,
+    });
+    return;
+  }
+
   const mappedSetsValue: setDto[] =
     sets.value?.reduce((acc, set) => {
       if (!set || !set?.[0] || !set?.[1]) return acc;
@@ -134,8 +154,13 @@ const onSaveClick = handleSubmit(async (values) => {
       ];
     }, [] as unknown as setDto[]) ?? [];
 
-  const { status, error } = await useFetch("api/matches", {
-    method: "POST",
+  const requestURL = isEditMode.value
+    ? `api/matches/${props.matchId}`
+    : "api/matches";
+
+  const { status, error } = await useFetch(requestURL, {
+    method: isEditMode.value ? "PATCH" : "POST",
+    params: isEditMode.value ? { id: props.matchId } : {},
     body: {
       date: values.date.toISOString(),
       homePlayerId: values.homePlayerId,
@@ -156,7 +181,7 @@ const onSaveClick = handleSubmit(async (values) => {
     emit("created:match");
     toast.add({
       severity: "success",
-      summary: "Match log is created.",
+      summary: toastSuccessMessage.value,
       life: 3000,
     });
   } else {
@@ -175,6 +200,39 @@ function onCreateNewPlayerClick() {
 function onAddSets() {
   isCreateSetsDialogVisible.value = true;
 }
+
+async function onShow() {
+  console.log("onShow", props.matchId);
+  if (props.matchId) {
+    const { data: matchData } = await useFetch<MatchDto>(
+      `api/matches/${props.matchId}`,
+      {
+        server: false,
+        onRequest({ options }) {
+          options.headers = options.headers || {};
+          (options.headers as Record<string, string>).authorization =
+            "Bearer " + useCookie("accessToken").value;
+        },
+      }
+    );
+
+    resetForm({
+      values: {
+        date: new Date(matchData?.value?.date ?? ""),
+        homePlayerId: matchData?.value?.homePlayer?.id,
+        awayPlayerId: matchData?.value?.awayPlayer?.id,
+        homePlayerSetsWon: matchData?.value?.homePlayerSetsWon,
+        awayPlayerSetsWon: matchData?.value?.awayPlayerSetsWon,
+        sets: matchData?.value?.sets?.map((set: setDto) => [
+          set.homePlayerPoints,
+          set.awayPlayerPoints,
+        ]),
+      },
+    });
+  } else {
+    setCurrentDate();
+  }
+}
 </script>
 
 <template>
@@ -184,7 +242,7 @@ function onAddSets() {
     class="w-[90%] md:w-auto fullscreen-dialog"
     v-bind="$attrs"
     @update:visible="$emit('update:visible', $event)"
-    @show="getCurrentDate"
+    @show="onShow"
     @hide="onHide"
   >
     <form class="grid gap-4 pt-5">
@@ -303,7 +361,11 @@ function onAddSets() {
             severity="secondary"
             @click="onCancelClick"
           ></Button>
-          <Button type="button" label="Save" @click="onSaveClick"></Button>
+          <Button
+            type="button"
+            :label="submitButtonText"
+            @click="onSubmit"
+          ></Button>
         </div>
       </div>
     </form>

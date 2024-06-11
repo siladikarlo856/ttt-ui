@@ -32,10 +32,22 @@ const { data: players, execute: getPlayers } = await useFetch<SelectOption[]>(
 function onAddMatchClick() {
   isCreateMatchDialogVisible.value = true;
 }
+
+const matchId = ref<string>();
+function onEdit(match: MatchDto) {
+  console.log("Edit match", match);
+  matchId.value = match.id;
+  isCreateMatchDialogVisible.value = true;
+}
 </script>
 <template>
-  <MatchLogTable :matches="matches ?? []" @add-match="onAddMatchClick" />
+  <MatchLogTable
+    :matches="matches ?? []"
+    @add-match="onAddMatchClick"
+    @edit="onEdit"
+  />
   <CreateMatchDialog
+    :match-id="matchId"
     v-model:visible="isCreateMatchDialogVisible"
     :players="players ?? []"
     @created:match="getMatches"

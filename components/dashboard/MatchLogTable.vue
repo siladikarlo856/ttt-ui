@@ -1,11 +1,21 @@
 <script setup lang="ts">
 export interface MatchDto {
-  id: number;
+  id: string;
   date: string;
-  homePlayerFullName: string;
-  awayPlayerFullName: string;
+  homePlayer: {
+    id: string;
+    label: string;
+  };
+  awayPlayer: {
+    id: string;
+    label: string;
+  };
   homePlayerSetsWon: number;
   awayPlayerSetsWon: number;
+  sets: {
+    homePlayerPoints: number;
+    awayPlayerPoints: number;
+  }[];
 }
 
 defineProps<{ matches: MatchDto[] }>();
@@ -46,6 +56,16 @@ function formatDate(value: string) {
         :rowsPerPageOptions="[5, 10, 20, 50]"
         tableStyle="min-width: 50rem"
       >
+        <Column style="width: 65px">
+          <template #body="{ data }">
+            <Button
+              icon="pi pi-pencil"
+              rounded
+              size="small"
+              class="h-8 w-8"
+              @click="$emit('edit', data)"
+          /></template>
+        </Column>
         <Column field="date" header="Date" dataType="date" sortable>
           <template #body="{ data }">
             {{ formatDate(data.date) }}
@@ -59,12 +79,8 @@ function formatDate(value: string) {
             />
           </template>
         </Column>
-        <Column field="homePlayerFullName" header="Home Player"></Column>
-        <Column
-          field="awayPlayerFullName"
-          header="Away Player"
-          sortable
-        ></Column>
+        <Column field="homePlayer.label" header="Home Player"></Column>
+        <Column field="awayPlayer.label" header="Away Player" sortable></Column>
         <Column
           field="homePlayerSetsWon"
           header="Home Player Sets"
