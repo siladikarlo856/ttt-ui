@@ -37,7 +37,7 @@ function formatDate(value: string) {
   <div class="flex flex-col h-full">
     <div class="flex justify-between">
       <p class="text-xl flex items-center">
-        <i class="pi pi-list mr-3"></i>Matches
+        <i class="pi pi-receipt mr-3"></i>Matches
       </p>
       <Button
         icon="pi pi-plus"
@@ -54,7 +54,6 @@ function formatDate(value: string) {
         paginator
         :rows="5"
         :rowsPerPageOptions="[5, 10, 20, 50]"
-        tableStyle="min-width: 50rem"
       >
         <Column style="width: 65px">
           <template #body="{ data }">
