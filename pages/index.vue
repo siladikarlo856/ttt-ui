@@ -39,6 +39,10 @@ function onEdit(match: MatchDto) {
   matchId.value = match.id;
   isCreateMatchDialogVisible.value = true;
 }
+
+const { data: user, pending } = useFetch("api/statistics/years", {
+  server: false,
+});
 </script>
 <template>
   <MatchLogTable
