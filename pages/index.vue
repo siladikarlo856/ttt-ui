@@ -6,34 +6,30 @@ import MatchLogTable from "~/components/dashboard/MatchLogTable.vue";
 import StatisticCard from "~/components/dashboard/StatisticCard.vue";
 
 const isCreateMatchDialogVisible = ref(false);
-
-const { data: matches, execute: getMatches } = await useFetch<MatchDto[]>(
-  "api/matches",
-  {
-    server: false,
-    onRequest({ options }) {
-      options.headers = options.headers || {};
-      (options.headers as Record<string, string>).authorization =
-        "Bearer " + useCookie("accessToken").value;
-    },
-  }
-);
-
+const matchId = ref<string>();
 const selectedOpponents = ref<string[]>([]);
-
-const { data: players, execute: getPlayers } = await useFetch<SelectOption[]>(
-  "api/players",
-  {
-    server: false,
-    onRequest({ options }) {
-      options.headers = options.headers || {};
-      (options.headers as Record<string, string>).authorization =
-        "Bearer " + useCookie("accessToken").value;
-    },
-  }
+const selectedTimeframe = ref<string>(
+  new Date().toLocaleDateString("en-EN", {
+    year: "numeric",
+  })
 );
+const timeframeOptions = ref<SelectOption[]>([
+  { label: selectedTimeframe.value, value: selectedTimeframe.value },
+]);
 
 const authStore = useAuthStore();
+
+const { data: availableYears } = await useAuthFetch<string[]>(
+  "/api/statistics/years"
+);
+
+const { data: matches, execute: getMatches } = await useAuthFetch<MatchDto[]>(
+  "/api/matches"
+);
+
+const { data: players, execute: getPlayers } = await useAuthFetch<
+  SelectOption[]
+>("api/players");
 
 const availablePlayers = computed<SelectOption[]>(() => {
   return (
@@ -42,6 +38,16 @@ const availablePlayers = computed<SelectOption[]>(() => {
     ) ?? []
   );
 });
+
+function onAddMatchClick() {
+  isCreateMatchDialogVisible.value = true;
+}
+
+function onEdit(match: MatchDto) {
+  console.log("Edit match", match);
+  matchId.value = match.id;
+  isCreateMatchDialogVisible.value = true;
+}
 
 watch(
   () => players.value,
@@ -52,26 +58,6 @@ watch(
   },
   { deep: true, immediate: true }
 );
-
-function onAddMatchClick() {
-  isCreateMatchDialogVisible.value = true;
-}
-
-const matchId = ref<string>();
-function onEdit(match: MatchDto) {
-  console.log("Edit match", match);
-  matchId.value = match.id;
-  isCreateMatchDialogVisible.value = true;
-}
-
-const selectedTimeframe = ref<string>(
-  new Date().toLocaleDateString("en-EN", {
-    year: "numeric",
-  })
-);
-const timeframeOptions = ref<SelectOption[]>([
-  { label: selectedTimeframe.value, value: selectedTimeframe.value },
-]);
 </script>
 <template>
   <div class="grid gap-4 grid-rows-[auto_auto_1fr] h-full">
