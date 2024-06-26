@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { get } from "@vueuse/core";
+import { formatDate } from "@vueuse/core";
 import CreateMatchDialog from "~/components/dashboard/CreateMatchDialog.vue";
 import type { MatchDto } from "~/components/dashboard/MatchLogTable.vue";
 import MatchLogTable from "~/components/dashboard/MatchLogTable.vue";
@@ -8,24 +8,8 @@ import StatisticCard from "~/components/dashboard/StatisticCard.vue";
 const isCreateMatchDialogVisible = ref(false);
 const matchId = ref<string>();
 const selectedOpponents = ref<string[]>([]);
-const selectedTimeframe = ref<string>(
-  new Date().toLocaleDateString("en-EN", {
-    year: "numeric",
-  })
-);
-const timeframeOptions = ref<SelectOption[]>([
-  { label: selectedTimeframe.value, value: selectedTimeframe.value },
-]);
 
 const authStore = useAuthStore();
-
-const { data: availableYears } = await useAuthFetch<string[]>(
-  "/api/statistics/years"
-);
-
-const { data: matches, execute: getMatches } = await useAuthFetch<MatchDto[]>(
-  "/api/matches"
-);
 
 const { data: players, execute: getPlayers } = await useAuthFetch<
   SelectOption[]
@@ -39,15 +23,21 @@ const availablePlayers = computed<SelectOption[]>(() => {
   );
 });
 
-function onAddMatchClick() {
-  isCreateMatchDialogVisible.value = true;
-}
+const { data: availableYears } = await useAuthFetch<SelectOption[]>(
+  "/api/statistics/years"
+);
+const selectedTimeframe = ref<string>(availableYears.value?.[0]?.value ?? "");
 
-function onEdit(match: MatchDto) {
-  console.log("Edit match", match);
-  matchId.value = match.id;
-  isCreateMatchDialogVisible.value = true;
-}
+const startDate = computed(() => new Date(selectedTimeframe.value.toString()));
+
+const { data: statistics, execute: getStatistics } =
+  await useFetch<StatisticsDto>("/api/statistics", {
+    method: "POST",
+    body: { startDate: startDate, opponents: selectedOpponents },
+    headers: {
+      Authorization: `Bearer ${useCookie("accessToken").value}`,
+    },
+  });
 
 watch(
   () => players.value,
@@ -58,6 +48,56 @@ watch(
   },
   { deep: true, immediate: true }
 );
+
+const { data: matches, execute: getMatches } = await useAuthFetch<MatchDto[]>(
+  "/api/matches",
+  {
+    params: {
+      year: selectedTimeframe,
+      opponents: selectedOpponents,
+    },
+  }
+);
+
+const areAllOpponentsSelected = computed(() => {
+  return selectedOpponents.value.length === availablePlayers.value.length;
+});
+
+const currentStreakTitle = computed(() => {
+  if (!statistics.value?.currentStreak?.startDate) return "No streak";
+  return statistics.value?.currentStreak?.type === "win"
+    ? "Winning streak"
+    : "Losing streak";
+});
+
+const currentStreakDescription = computed(() => {
+  if (!statistics.value?.currentStreak?.startDate) return "";
+
+  const startDate = new Date(statistics.value?.currentStreak?.startDate);
+  const formattedStartDate = formatDate(startDate, "DD.MM.YYYY");
+
+  return `since ${formattedStartDate}`;
+});
+
+const winRatio = computed(() => {
+  if (!statistics.value?.winRatio) return "";
+  return (statistics.value?.winRatio * 100).toFixed(2) + "%";
+});
+
+function onAddMatchClick() {
+  isCreateMatchDialogVisible.value = true;
+}
+
+function onEdit(match: MatchDto) {
+  console.log("Edit match", match);
+  matchId.value = match.id;
+  isCreateMatchDialogVisible.value = true;
+}
+
+function onMatchCreated() {
+  getMatches();
+  getStatistics();
+}
 </script>
 <template>
   <div class="grid gap-4 grid-rows-[auto_auto_1fr] h-full">
@@ -75,13 +115,15 @@ watch(
             :options="availablePlayers ?? []"
             option-value="value"
             option-label="label"
-          />
+          >
+            <template v-if="areAllOpponentsSelected" #value>All</template>
+          </MultiSelect>
         </div>
         <div class="flex flex-col items-start gap-2 w-full">
           <label for="time-frame">Time frame</label>
           <Dropdown
             v-model="selectedTimeframe"
-            :options="timeframeOptions"
+            :options="availableYears ?? []"
             option-value="value"
             option-label="label"
             class="w-full"
@@ -99,26 +141,26 @@ watch(
           class="w-full"
           color="text-success"
           title="Wins"
-          :value="15"
+          :value="statistics?.wins"
         />
         <StatisticCard
           class="w-full"
           color="text-warning"
           title="Losses"
-          :value="2"
+          :value="statistics?.losses"
         />
         <StatisticCard
           class="w-full"
           color="text-indigo-500"
           title="Win ratio"
-          value="53.68%"
+          :value="winRatio"
         />
         <StatisticCard
           class="w-full"
           color="text-meta-10"
-          title="Winning streak"
-          value="1"
-          description="since 05.03.2024"
+          :title="currentStreakTitle"
+          :value="statistics?.currentStreak.length"
+          :description="currentStreakDescription"
         />
       </div>
     </div>
@@ -134,7 +176,7 @@ watch(
     :match-id="matchId"
     v-model:visible="isCreateMatchDialogVisible"
     :players="players ?? []"
-    @created:match="getMatches"
+    @created:match="onMatchCreated"
     @created:player="getPlayers"
   />
 </template>
