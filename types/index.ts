@@ -10,3 +10,18 @@ interface CreateMatchDto {
   homePlayerSetsWon: number;
   awayPlayerSetsWon: number;
 }
+
+interface StatisticsDto {
+  wins: number;
+  losses: number;
+  winRatio: number;
+  currentStreak: Streak;
+}
+
+interface Streak {
+  type: StreakType;
+  length: number;
+  startDate: string;
+}
+
+type StreakType = "win" | "loss";
