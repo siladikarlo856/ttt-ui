@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import type { MatchType } from "~/utils/constants";
+
 export interface MatchDto {
   id: string;
   date: string;
+  type: MatchType;
   homePlayer: {
     id: string;
     label: string;
@@ -90,6 +93,13 @@ function formatDate(value: string) {
           header="Away Player Sets"
           sortable
         ></Column>
+        <Column field="type" header="Type" sortable>
+          <template #body="{ data }">
+            {{
+              matchTypes.find((t: SelectOption) => t.value === data.type)?.label
+            }}
+          </template>
+        </Column>
       </DataTable>
     </div>
   </div>

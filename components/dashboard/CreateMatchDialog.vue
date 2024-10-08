@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { z } from "zod";
+import { nullable, z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useAuthStore } from "~/stores/auth";
 import CreatePlayerDialog from "./CreatePlayerDialog.vue";
 import CreateSetsDialog from "./CreateSetsDialog.vue";
 import type { MatchDto } from "./MatchLogTable.vue";
+import Dropdown from "primevue/dropdown";
+import { matchTypes } from "~/utils/constants";
 
-const props = defineProps<{
-  visible: boolean;
-  players?: SelectOption[] | undefined;
-  matchId?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    visible: boolean;
+    players?: SelectOption[];
+    matchId?: string;
+  }>(),
+  {
+    players: () => [],
+  }
+);
 
 const emit = defineEmits<{
   "update:visible": [value: boolean];
@@ -18,6 +25,7 @@ const emit = defineEmits<{
   "click:add-player": [];
   "click:add-sets": [];
   "created:player": [];
+  hide: [];
 }>();
 
 const store = useAuthStore();
@@ -35,8 +43,9 @@ const toastSuccessMessage = computed(() =>
 const { handleSubmit, errors, defineField, resetForm, meta } = useForm({
   validationSchema: toTypedSchema(
     z.object({
-      date: z.date(),
-      homePlayerId: z.string().min(1),
+      date: z.date().nullable(),
+      type: z.nativeEnum(MatchType).nullable(),
+      homePlayerId: z.string().min(1).nullable(),
       awayPlayerId: z.string().min(1, "Opponent is required"),
       homePlayerSetsWon: z
         .number({
@@ -45,7 +54,8 @@ const { handleSubmit, errors, defineField, resetForm, meta } = useForm({
         })
         .int()
         .min(0)
-        .max(9),
+        .max(9)
+        .nullable(),
       awayPlayerSetsWon: z
         .number({
           required_error: "Sets won is required",
@@ -53,18 +63,26 @@ const { handleSubmit, errors, defineField, resetForm, meta } = useForm({
         })
         .int()
         .min(0)
-        .max(9),
+        .max(9)
+        .nullable(),
       sets: z.array(z.array(z.number()).optional()),
     })
   ),
   initialValues: {
     homePlayerId: store.user?.playerId ?? "",
     awayPlayerId: "",
+    awayPlayerSetsWon: null,
+    homePlayerSetsWon: null,
+    date: new Date(),
+    type: null,
     sets: [],
   },
 });
 
 const [date, dateAttrs] = defineField("date", {
+  validateOnBlur: true,
+});
+const [matchType, matchTypeAttrs] = defineField("type", {
   validateOnBlur: true,
 });
 const [homePlayerId, homePlayerIdAttrs] = defineField("homePlayerId", {
@@ -118,7 +136,18 @@ function onCancelClick() {
 }
 
 function onHide() {
-  resetForm();
+  resetForm({
+    values: {
+      date: new Date(),
+      homePlayerId: store.user?.playerId ?? "",
+      awayPlayerId: "",
+      awayPlayerSetsWon: null,
+      homePlayerSetsWon: null,
+      sets: [],
+      type: null,
+    },
+  });
+  emit("hide");
 }
 
 function setCurrentDate() {
@@ -162,12 +191,13 @@ const onSubmit = handleSubmit(async (values) => {
     method: isEditMode.value ? "PATCH" : "POST",
     params: isEditMode.value ? { id: props.matchId } : {},
     body: {
-      date: values.date.toISOString(),
+      date: values.date?.toISOString(),
       homePlayerId: values.homePlayerId,
       awayPlayerId: values.awayPlayerId,
       homePlayerSetsWon: values.homePlayerSetsWon,
       awayPlayerSetsWon: values.awayPlayerSetsWon,
       sets: mappedSetsValue,
+      type: values.type,
     },
     onRequest({ options }) {
       options.headers = options.headers || {};
@@ -227,6 +257,7 @@ async function onShow() {
           set.homePlayerPoints,
           set.awayPlayerPoints,
         ]),
+        type: matchData?.value?.type,
       },
     });
   } else {
@@ -263,8 +294,9 @@ async function onShow() {
               <div v-if="slotProps.value" class="flex align-items-center">
                 <div>
                   {{
-                    players?.find((player) => player.value === slotProps.value)
-                      ?.label
+                    players?.find(
+                      (player: SelectOption) => player.value === slotProps.value
+                    )?.label
                   }}
                   (You)
                 </div>
@@ -343,6 +375,19 @@ async function onShow() {
             date-format="dd.mm.yy."
             class="w-full"
             showButtonBar
+          />
+        </div>
+        <div class="flex flex-col items-start gap-2 mb-4">
+          <label for="matchType">MatchType</label>
+          <Dropdown
+            id="matchType"
+            v-model="matchType"
+            v-bind="matchTypeAttrs"
+            :options="matchTypes"
+            option-label="label"
+            option-value="value"
+            placeholder="Select match type"
+            class="w-full"
           />
         </div>
       </div>

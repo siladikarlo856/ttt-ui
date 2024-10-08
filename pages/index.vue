@@ -17,8 +17,8 @@ const { data: players, execute: getPlayers } = await useAuthFetch<
 
 const availablePlayers = computed<SelectOption[]>(() => {
   return (
-    players.value?.filter(
-      (player) => player.value !== authStore.user?.playerId
+    (players.value as SelectOption[])?.filter(
+      (player: SelectOption) => player.value !== authStore.user?.playerId
     ) ?? []
   );
 });
@@ -97,6 +97,10 @@ function onEdit(match: MatchDto) {
 function onMatchCreated() {
   getMatches();
   getStatistics();
+}
+
+function onCreateMatchDialogHide() {
+  matchId.value = "";
 }
 </script>
 <template>
@@ -178,5 +182,6 @@ function onMatchCreated() {
     :players="players ?? []"
     @created:match="onMatchCreated"
     @created:player="getPlayers"
+    @hide="onCreateMatchDialogHide"
   />
 </template>
