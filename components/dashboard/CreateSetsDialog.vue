@@ -17,9 +17,7 @@ function onCancelClick() {
 }
 
 const { handleSubmit, resetForm } = useForm({
-  initialValues: { sets: props.modelValue } ?? {
-    sets: [],
-  },
+  initialValues: { sets: props.modelValue ?? [] },
 });
 
 watch(

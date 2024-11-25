@@ -1,9 +1,31 @@
-interface SelectOption {
+import type { MatchType } from "~/utils/enums";
+
+export interface SelectOption {
   value: string;
   label: string;
 }
 
-interface CreateMatchDto {
+export interface MatchDto {
+  id: string;
+  date: string;
+  type: MatchType;
+  homePlayer: {
+    id: string;
+    label: string;
+  };
+  awayPlayer: {
+    id: string;
+    label: string;
+  };
+  homePlayerSetsWon: number;
+  awayPlayerSetsWon: number;
+  sets: {
+    homePlayerPoints: number;
+    awayPlayerPoints: number;
+  }[];
+}
+
+export interface CreateMatchDto {
   date: string;
   homePlayerId: string;
   awayPlayerId: string;
@@ -11,17 +33,17 @@ interface CreateMatchDto {
   awayPlayerSetsWon: number;
 }
 
-interface StatisticsDto {
+export interface StatisticsDto {
   wins: number;
   losses: number;
   winRatio: number;
   currentStreak: Streak;
 }
 
-interface Streak {
+export interface Streak {
   type: StreakType;
   length: number;
   startDate: string;
 }
 
-type StreakType = "win" | "loss";
+export type StreakType = "win" | "loss";

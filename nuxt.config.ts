@@ -30,6 +30,7 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
     "@vee-validate/nuxt",
     "@nuxtjs/color-mode",
+    "@nuxt/eslint"
   ],
   primevue: {
     options: {

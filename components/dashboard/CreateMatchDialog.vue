@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nullable, z } from "zod";
+import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useAuthStore } from "~/stores/auth";
 import CreatePlayerDialog from "./CreatePlayerDialog.vue";

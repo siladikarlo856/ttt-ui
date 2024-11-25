@@ -1,25 +1,5 @@
 <script setup lang="ts">
-import type { MatchType } from "~/utils/constants";
-
-export interface MatchDto {
-  id: string;
-  date: string;
-  type: MatchType;
-  homePlayer: {
-    id: string;
-    label: string;
-  };
-  awayPlayer: {
-    id: string;
-    label: string;
-  };
-  homePlayerSetsWon: number;
-  awayPlayerSetsWon: number;
-  sets: {
-    homePlayerPoints: number;
-    awayPlayerPoints: number;
-  }[];
-}
+import type { MatchDto, SelectOption } from "~/types";
 
 defineProps<{ matches: MatchDto[] }>();
 
