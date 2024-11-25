@@ -80,7 +80,7 @@ const currentStreakDescription = computed(() => {
 });
 
 const winRatio = computed(() => {
-  if (!statistics.value?.winRatio) return "";
+  if (!statistics.value?.winRatio) return null;
   return (statistics.value?.winRatio * 100).toFixed(2) + "%";
 });
 

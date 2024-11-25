@@ -4,9 +4,8 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useAuthStore } from "~/stores/auth";
 import CreatePlayerDialog from "./CreatePlayerDialog.vue";
 import CreateSetsDialog from "./CreateSetsDialog.vue";
-import type { MatchDto } from "./MatchLogTable.vue";
-import Dropdown from "primevue/dropdown";
 import { matchTypes } from "~/utils/constants";
+import type { SelectOption, MatchDto } from "~/types";
 
 const props = withDefaults(
   defineProps<{

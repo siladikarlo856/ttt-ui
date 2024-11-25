@@ -25,21 +25,21 @@ export default defineNuxtConfig({
   },
   modules: [
     "@nuxtjs/tailwindcss",
-    "nuxt-primevue",
+    "@primevue/nuxt-module",
     "@pinia/nuxt",
     "@vueuse/nuxt",
     "@vee-validate/nuxt",
     "@nuxtjs/color-mode",
-    "@nuxt/eslint"
+    "@nuxt/eslint",
   ],
   primevue: {
+    importTheme: { from: "@/themes/mytheme.js" },
+
     options: {
       ripple: true,
     },
-    cssLayerOrder: "tailwind-base, primevue, tailwind-utilities",
   },
   css: ["~/assets/css/tailwind.css", "primeicons/primeicons.css"],
-
   colorMode: {
     classSuffix: "", // disable the default '-mode' suffix
   },
