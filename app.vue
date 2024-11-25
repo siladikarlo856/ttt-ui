@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const darkModeStore = useDarkModeStore();
+useDarkMode();
 </script>
 
 <template>
@@ -9,7 +9,7 @@ const darkModeStore = useDarkModeStore();
   <Toast />
 </template>
 
-<style>
+<style lang="postcss">
 .error-message {
   @apply text-danger h-6;
 }
