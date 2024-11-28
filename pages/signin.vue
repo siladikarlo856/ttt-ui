@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import DefaultAuthCard from "~/components/auth/DefaultAuthCard.vue";
+import type { SignUpFormSubmitParams } from "~/components/signin/SigninForm.vue";
 
 definePageMeta({
   layout: "auth",
@@ -9,7 +10,7 @@ const { authenticateUser } = useAuthStore(); // use authenticateUser action from
 const { isAuthenticated, isLoading } = storeToRefs(useAuthStore()); // make authenticated state reactive with storeToRefs
 const router = useRouter();
 
-async function onSubmit(payload: { email: string; password: string }) {
+async function onSubmit(payload: SignUpFormSubmitParams) {
   await authenticateUser(payload);
 
   if (isAuthenticated.value) {

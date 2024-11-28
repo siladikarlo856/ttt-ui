@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { validationSchema } from "./validationSchema";
 
+export interface SignUpFormSubmitParams {
+  email: string;
+  password: string;
+}
+
 defineProps<{
   loading: boolean;
 }>();
 
 const emit = defineEmits<{
-  submit: [payload: { email: string; password: string }];
+  submit: [payload: SignUpFormSubmitParams];
 }>();
 
 const { errors, handleSubmit, defineField } = useForm<{
