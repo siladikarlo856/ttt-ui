@@ -1,6 +1,6 @@
-ARG NODE_VERSION=20
+ARG VARIANT=20-slim
 
-FROM node:${NODE_VERSION}-slim as base
+FROM node:${VARIANT} as base
 
 ARG PORT=3000
 
