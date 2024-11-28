@@ -15,12 +15,13 @@ const props = withDefaults(
   }>(),
   {
     players: () => [],
+    matchId: undefined,
   }
 );
 
 const emit = defineEmits<{
   "update:visible": [value: boolean];
-  "created:match": [void];
+  "created:match": [];
   "click:add-player": [];
   "click:add-sets": [];
   "created:player": [];
@@ -160,7 +161,6 @@ interface setDto {
 
 const onSubmit = handleSubmit(async (values) => {
   if (!meta.value.dirty) {
-    console.log("No changes");
     toast.add({
       severity: "info",
       summary: "No changes",
@@ -231,7 +231,6 @@ function onAddSets() {
 }
 
 async function onShow() {
-  console.log("onShow", props.matchId);
   if (props.matchId) {
     const { data: matchData } = await useFetch<MatchDto>(
       `api/matches/${props.matchId}`,
@@ -283,7 +282,7 @@ async function onShow() {
             id="homePlayer"
             v-model="homePlayerId"
             v-bind="homePlayerIdAttrs"
-            :options="players ?? []"
+            :options="players"
             option-value="value"
             option-label="label"
             class="w-full"
@@ -369,11 +368,11 @@ async function onShow() {
           <Calendar
             v-model="date"
             v-bind="dateAttrs"
-            inputId="matchDate"
-            :maxDate="new Date()"
+            input-id="matchDate"
+            :max-date="new Date()"
             date-format="dd.mm.yy."
             class="w-full"
-            showButtonBar
+            show-button-bar
           />
         </div>
         <div class="flex flex-col items-start gap-2 mb-4">
@@ -404,12 +403,8 @@ async function onShow() {
             label="Cancel"
             severity="secondary"
             @click="onCancelClick"
-          ></Button>
-          <Button
-            type="button"
-            :label="submitButtonText"
-            @click="onSubmit"
-          ></Button>
+          />
+          <Button type="button" :label="submitButtonText" @click="onSubmit" />
         </div>
       </div>
     </form>

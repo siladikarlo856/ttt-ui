@@ -89,7 +89,6 @@ function onAddMatchClick() {
 }
 
 function onEdit(match: MatchDto) {
-  console.log("Edit match", match);
   matchId.value = match.id;
   isCreateMatchDialogVisible.value = true;
 }
