@@ -42,7 +42,7 @@ defineProps<{
             {{ title }}
           </h2>
 
-          <slot></slot>
+          <slot />
         </div>
       </div>
     </div>

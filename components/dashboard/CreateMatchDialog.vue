@@ -31,8 +31,17 @@ const emit = defineEmits<{
 const store = useAuthStore();
 const toast = useToast();
 
-const isCreatePlayerDialogVisible = ref(false);
-const isCreateSetsDialogVisible = ref(false);
+const {
+  isVisible: isCreatePlayerDialogVisible,
+  show: showCreatePlayerDialog,
+  hide: hideCreatePlayerDialog,
+} = useVisibilityController();
+
+const {
+  isVisible: isCreateSetsDialogVisible,
+  show: showCreateSetsDialog,
+  hide: hideCreateSetsDialog,
+} = useVisibilityController();
 
 const isEditMode = computed(() => !!props.matchId);
 const submitButtonText = computed(() => (isEditMode.value ? "Update" : "Save"));
@@ -223,11 +232,11 @@ const onSubmit = handleSubmit(async (values) => {
 });
 
 function onCreateNewPlayerClick() {
-  isCreatePlayerDialogVisible.value = true;
+  showCreatePlayerDialog();
 }
 
 function onAddSets() {
-  isCreateSetsDialogVisible.value = true;
+  showCreateSetsDialog();
 }
 
 async function onShow() {

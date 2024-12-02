@@ -1,6 +1,6 @@
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.hook("app:created", async () => {
-    if (import.meta.dev) {
+    if (import.meta.dev && false) {
       const { worker } = await import("../mocks/browser");
       worker.start();
     }

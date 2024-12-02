@@ -47,3 +47,8 @@ export interface Streak {
 }
 
 export type StreakType = "win" | "loss";
+
+export interface CreatePlayerDto {
+  firstName: string;
+  lastName: string;
+}
