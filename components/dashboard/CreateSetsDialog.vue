@@ -65,8 +65,8 @@ const onSaveClick = handleSubmit((values) => {
           label="Cancel"
           severity="secondary"
           @click="onCancelClick"
-        ></Button>
-        <Button type="button" label="Save" @click="onSaveClick"></Button>
+        />
+        <Button type="button" label="Save" @click="onSaveClick" />
       </div>
     </template>
   </Dialog>
