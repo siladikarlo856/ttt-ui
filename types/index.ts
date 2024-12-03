@@ -1,3 +1,4 @@
+import type { Component } from "vue";
 import type { MatchType } from "~/utils/enums";
 
 export interface SelectOption {
@@ -51,4 +52,16 @@ export type StreakType = "win" | "loss";
 export interface CreatePlayerDto {
   firstName: string;
   lastName: string;
+}
+
+export interface MenuGroup {
+  name: string;
+  menuItems: MenuItem[];
+}
+
+export interface MenuItem {
+  icon: Component;
+  label: string;
+  route: string;
+  children?: MenuItem[];
 }

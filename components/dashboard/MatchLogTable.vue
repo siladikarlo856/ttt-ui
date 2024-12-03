@@ -4,7 +4,8 @@ import type { MatchDto, SelectOption } from "~/types";
 defineProps<{ matches: MatchDto[] }>();
 
 defineEmits<{
-  addMatch: [void];
+  addMatch: [];
+  edit: [match: MatchDto];
 }>();
 
 function formatDate(value: string) {
@@ -20,7 +21,7 @@ function formatDate(value: string) {
   <div class="flex flex-col h-full">
     <div class="flex justify-between">
       <p class="text-xl flex items-center">
-        <i class="pi pi-receipt mr-3"></i>Matches
+        <i class="pi pi-receipt mr-3" />Matches
       </p>
       <Button
         icon="pi pi-plus"
@@ -33,10 +34,10 @@ function formatDate(value: string) {
     <div class="flex-grow">
       <DataTable
         :value="matches ?? []"
-        stripedRows
+        striped-rows
         paginator
         :rows="5"
-        :rowsPerPageOptions="[5, 10, 20, 50]"
+        :rows-per-page-options="[5, 10, 20, 50]"
       >
         <Column style="width: 65px">
           <template #body="{ data }">
@@ -48,31 +49,23 @@ function formatDate(value: string) {
               @click="$emit('edit', data)"
           /></template>
         </Column>
-        <Column field="date" header="Date" dataType="date" sortable>
+        <Column field="date" header="Date" data-type="date" sortable>
           <template #body="{ data }">
             {{ formatDate(data.date) }}
           </template>
           <template #filter="{ filterModel }">
             <Calendar
               v-model="filterModel.value"
-              dateFormat="mm/dd/yy"
+              date-format="mm/dd/yy"
               placeholder="mm/dd/yyyy"
               mask="99/99/9999"
             />
           </template>
         </Column>
-        <Column field="homePlayer.label" header="Home Player"></Column>
-        <Column field="awayPlayer.label" header="Away Player" sortable></Column>
-        <Column
-          field="homePlayerSetsWon"
-          header="Home Player Sets"
-          sortable
-        ></Column>
-        <Column
-          field="awayPlayerSetsWon"
-          header="Away Player Sets"
-          sortable
-        ></Column>
+        <Column field="homePlayer.label" header="Home Player" />
+        <Column field="awayPlayer.label" header="Away Player" sortable />
+        <Column field="homePlayerSetsWon" header="Home Player Sets" sortable />
+        <Column field="awayPlayerSetsWon" header="Away Player Sets" sortable />
         <Column field="type" header="Type" sortable>
           <template #body="{ data }">
             {{

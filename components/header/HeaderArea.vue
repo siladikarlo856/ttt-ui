@@ -3,7 +3,14 @@ import { useSidebarStore } from "@/stores/sidebar";
 import DarkModeSwitcher from "./DarkModeSwitcher.vue";
 import DropdownUser from "./DropdownUser.vue";
 
-const { isSidebarOpen, toggleSidebar } = useSidebarStore();
+const store = useSidebarStore();
+
+const { toggleSidebar } = store;
+const { isSidebarOpen } = storeToRefs(store);
+
+function onButtonClick() {
+  toggleSidebar();
+}
 </script>
 
 <template>
@@ -14,43 +21,10 @@ const { isSidebarOpen, toggleSidebar } = useSidebarStore();
       class="flex flex-grow items-center justify-between lg:justify-end py-4 px-4 shadow-2 md:px-6 2xl:px-11"
     >
       <div class="flex items-center gap-2 sm:gap-4 lg:hidden">
-        <!-- Hamburger Toggle BTN -->
-        <button
-          class="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
-          @click="
-            () => {
-              toggleSidebar();
-            }
-          "
-        >
-          <span class="relative block h-5.5 w-5.5 cursor-pointer">
-            <span class="du-block absolute right-0 h-full w-full">
-              <span
-                class="relative top-0 left-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-[0] duration-200 ease-in-out dark:bg-white"
-                :class="{ '!w-full delay-300': !isSidebarOpen }"
-              ></span>
-              <span
-                class="relative top-0 left-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-150 duration-200 ease-in-out dark:bg-white"
-                :class="{ '!w-full delay-400': !isSidebarOpen }"
-              ></span>
-              <span
-                class="relative top-0 left-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-200 duration-200 ease-in-out dark:bg-white"
-                :class="{ '!w-full delay-500': !isSidebarOpen }"
-              ></span>
-            </span>
-            <span class="du-block absolute right-0 h-full w-full rotate-45">
-              <span
-                class="absolute left-2.5 top-0 block h-full w-0.5 rounded-sm bg-black delay-300 duration-200 ease-in-out dark:bg-white"
-                :class="{ '!h-0 delay-[0]': !isSidebarOpen }"
-              ></span>
-              <span
-                class="delay-400 absolute left-0 top-2.5 block h-0.5 w-full rounded-sm bg-black duration-200 ease-in-out dark:bg-white"
-                :class="{ '!h-0 dealy-200': !isSidebarOpen }"
-              ></span>
-            </span>
-          </span>
-        </button>
-        <!-- Hamburger Toggle BTN -->
+        <HeaderHamburgerButton
+          :is-sidebar-open="isSidebarOpen"
+          @click="onButtonClick"
+        />
         <router-link
           class="flex flex-shrink-0 lg:hidden gap-2 items-center"
           to="/"
