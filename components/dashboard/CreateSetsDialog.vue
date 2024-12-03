@@ -1,55 +1,41 @@
 <script lang="ts" setup>
 import SetField from "./SetField.vue";
-import { defineProps, defineEmits } from "vue";
-const props = defineProps<{
-  modelValue: (number[] | undefined)[];
-  visible: boolean;
-}>();
 
-const emit = defineEmits<{
-  "update:modelValue": [value: (number[] | undefined)[]];
-  "update:visible": [value: boolean];
-}>();
+const modelValue = defineModel<number[] | undefined>();
+const visible = defineModel<boolean>();
 
 // FUNCTIONS
 function onCancelClick() {
-  emit("update:visible", false);
+  visible.value = false;
 }
 
 const { handleSubmit, resetForm } = useForm({
-  initialValues: { sets: props.modelValue ?? [] },
+  initialValues: { sets: modelValue.value ?? [] },
 });
 
-watch(
-  () => props.modelValue,
-  (value) => {
-    resetForm({ values: { sets: value } });
-  }
-);
+watch(modelValue, (value) => {
+  resetForm({ values: { sets: value } });
+});
 
-watch(
-  () => props.visible,
-  (value) => {
-    if (value) {
-      resetForm({ values: { sets: props.modelValue } });
-    }
+watch(visible, (value) => {
+  if (value) {
+    resetForm({ values: { sets: modelValue.value } });
   }
-);
+});
 
 const onSaveClick = handleSubmit((values) => {
-  emit("update:modelValue", values.sets);
-  emit("update:visible", false);
+  modelValue.value = values.sets;
+  visible.value = false;
 });
 </script>
 
 <template>
   <Dialog
-    :visible="visible"
+    v-model:visible="visible"
     full-screen
     class="fullscreen-dialog"
     header="Set points"
     :base-z-index="9000"
-    @update:visible="$emit('update:visible', $event)"
   >
     <div class="flex flex-col gap-4">
       <SetField :set-number="1" />

@@ -1,14 +1,12 @@
 <script lang="ts" setup>
 import CreatePlayerForm from "@/components/dashboard/CreatePlayerForm.vue";
-
-defineProps({
-  visible: Boolean,
-});
+import type { CreatePlayerDto } from "~/types";
 
 const emit = defineEmits<{
-  "update:visible": [value: boolean];
   "created:player": [];
 }>();
+
+const visible = defineModel<boolean>("visible");
 
 const toast = useToast();
 
@@ -26,7 +24,8 @@ async function onCreateClick(player: CreatePlayerDto) {
       life: 3000,
     });
 
-    emit("update:visible", false);
+    visible.value = false;
+
     emit("created:player");
   }
 }
@@ -36,17 +35,16 @@ function resetForm() {
 }
 
 function onCancelClick() {
-  emit("update:visible", false);
+  visible.value = false;
 }
 </script>
 
 <template>
   <Dialog
+    v-model:visible="visible"
     header="Add New Player"
-    :visible="visible"
     :base-z-index="9000"
     class="fullscreen-dialog"
-    @update:visible="$emit('update:visible', $event)"
     @hide="resetForm"
   >
     <CreatePlayerForm

@@ -9,7 +9,6 @@ import type { SelectOption, MatchDto } from "~/types";
 
 const props = withDefaults(
   defineProps<{
-    visible: boolean;
     players?: SelectOption[];
     matchId?: string;
   }>(),
@@ -20,7 +19,6 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  "update:visible": [value: boolean];
   "created:match": [];
   "click:add-player": [];
   "click:add-sets": [];
@@ -28,20 +26,16 @@ const emit = defineEmits<{
   hide: [];
 }>();
 
+const visible = defineModel<boolean>("visible");
+
 const store = useAuthStore();
 const toast = useToast();
 
-const {
-  isVisible: isCreatePlayerDialogVisible,
-  show: showCreatePlayerDialog,
-  hide: hideCreatePlayerDialog,
-} = useVisibilityController();
+const { isVisible: isCreatePlayerDialogVisible, show: showCreatePlayerDialog } =
+  useVisibilityController();
 
-const {
-  isVisible: isCreateSetsDialogVisible,
-  show: showCreateSetsDialog,
-  hide: hideCreateSetsDialog,
-} = useVisibilityController();
+const { isVisible: isCreateSetsDialogVisible, show: showCreateSetsDialog } =
+  useVisibilityController();
 
 const isEditMode = computed(() => !!props.matchId);
 const submitButtonText = computed(() => (isEditMode.value ? "Update" : "Save"));
@@ -141,7 +135,7 @@ const matchSetsText = computed(() => {
 
 // FUNCTIONS
 function onCancelClick() {
-  emit("update:visible", false);
+  visible.value = false;
 }
 
 function onHide() {
@@ -215,7 +209,7 @@ const onSubmit = handleSubmit(async (values) => {
   });
 
   if (status.value === "success") {
-    emit("update:visible", false);
+    visible.value = false;
     emit("created:match");
     toast.add({
       severity: "success",
@@ -275,11 +269,10 @@ async function onShow() {
 
 <template>
   <Dialog
-    :visible="visible"
+    v-model:visible="visible"
     header="Add New Match"
     class="w-[90%] md:w-auto fullscreen-dialog"
     v-bind="$attrs"
-    @update:visible="$emit('update:visible', $event)"
     @show="onShow"
     @hide="onHide"
   >
