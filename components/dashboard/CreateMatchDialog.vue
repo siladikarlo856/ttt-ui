@@ -1,38 +1,41 @@
 <script setup lang="ts">
-import { nullable, z } from "zod";
+import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useAuthStore } from "~/stores/auth";
 import CreatePlayerDialog from "./CreatePlayerDialog.vue";
 import CreateSetsDialog from "./CreateSetsDialog.vue";
-import type { MatchDto } from "./MatchLogTable.vue";
-import Dropdown from "primevue/dropdown";
 import { matchTypes } from "~/utils/constants";
+import type { SelectOption, MatchDto } from "~/types";
 
 const props = withDefaults(
   defineProps<{
-    visible: boolean;
     players?: SelectOption[];
     matchId?: string;
   }>(),
   {
     players: () => [],
+    matchId: undefined,
   }
 );
 
 const emit = defineEmits<{
-  "update:visible": [value: boolean];
-  "created:match": [void];
+  "created:match": [];
   "click:add-player": [];
   "click:add-sets": [];
   "created:player": [];
   hide: [];
 }>();
 
+const visible = defineModel<boolean>("visible");
+
 const store = useAuthStore();
 const toast = useToast();
 
-const isCreatePlayerDialogVisible = ref(false);
-const isCreateSetsDialogVisible = ref(false);
+const { isVisible: isCreatePlayerDialogVisible, show: showCreatePlayerDialog } =
+  useVisibilityController();
+
+const { isVisible: isCreateSetsDialogVisible, show: showCreateSetsDialog } =
+  useVisibilityController();
 
 const isEditMode = computed(() => !!props.matchId);
 const submitButtonText = computed(() => (isEditMode.value ? "Update" : "Save"));
@@ -132,7 +135,7 @@ const matchSetsText = computed(() => {
 
 // FUNCTIONS
 function onCancelClick() {
-  emit("update:visible", false);
+  visible.value = false;
 }
 
 function onHide() {
@@ -161,7 +164,6 @@ interface setDto {
 
 const onSubmit = handleSubmit(async (values) => {
   if (!meta.value.dirty) {
-    console.log("No changes");
     toast.add({
       severity: "info",
       summary: "No changes",
@@ -207,7 +209,7 @@ const onSubmit = handleSubmit(async (values) => {
   });
 
   if (status.value === "success") {
-    emit("update:visible", false);
+    visible.value = false;
     emit("created:match");
     toast.add({
       severity: "success",
@@ -224,15 +226,14 @@ const onSubmit = handleSubmit(async (values) => {
 });
 
 function onCreateNewPlayerClick() {
-  isCreatePlayerDialogVisible.value = true;
+  showCreatePlayerDialog();
 }
 
 function onAddSets() {
-  isCreateSetsDialogVisible.value = true;
+  showCreateSetsDialog();
 }
 
 async function onShow() {
-  console.log("onShow", props.matchId);
   if (props.matchId) {
     const { data: matchData } = await useFetch<MatchDto>(
       `api/matches/${props.matchId}`,
@@ -268,11 +269,10 @@ async function onShow() {
 
 <template>
   <Dialog
-    :visible="visible"
+    v-model:visible="visible"
     header="Add New Match"
     class="w-[90%] md:w-auto fullscreen-dialog"
     v-bind="$attrs"
-    @update:visible="$emit('update:visible', $event)"
     @show="onShow"
     @hide="onHide"
   >
@@ -284,7 +284,7 @@ async function onShow() {
             id="homePlayer"
             v-model="homePlayerId"
             v-bind="homePlayerIdAttrs"
-            :options="players ?? []"
+            :options="players"
             option-value="value"
             option-label="label"
             class="w-full"
@@ -370,11 +370,11 @@ async function onShow() {
           <Calendar
             v-model="date"
             v-bind="dateAttrs"
-            inputId="matchDate"
-            :maxDate="new Date()"
+            input-id="matchDate"
+            :max-date="new Date()"
             date-format="dd.mm.yy."
             class="w-full"
-            showButtonBar
+            show-button-bar
           />
         </div>
         <div class="flex flex-col items-start gap-2 mb-4">
@@ -405,12 +405,8 @@ async function onShow() {
             label="Cancel"
             severity="secondary"
             @click="onCancelClick"
-          ></Button>
-          <Button
-            type="button"
-            :label="submitButtonText"
-            @click="onSubmit"
-          ></Button>
+          />
+          <Button type="button" :label="submitButtonText" @click="onSubmit" />
         </div>
       </div>
     </form>

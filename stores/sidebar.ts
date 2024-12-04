@@ -6,6 +6,10 @@ export const useSidebarStore = defineStore("sidebarStore", () => {
   const selected = useLocalStorage("selected", "home");
   const page = useLocalStorage("page", "home");
 
+  function closeSidebar() {
+    isSidebarOpen.value = false;
+  }
+
   function toggleSidebar() {
     isSidebarOpen.value = !isSidebarOpen.value;
   }
@@ -13,6 +17,7 @@ export const useSidebarStore = defineStore("sidebarStore", () => {
   return {
     isSidebarOpen,
     toggleSidebar,
+    closeSidebar,
     selected,
     page,
   };

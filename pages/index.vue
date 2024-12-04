@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { formatDate } from "@vueuse/core";
 import CreateMatchDialog from "~/components/dashboard/CreateMatchDialog.vue";
-import type { MatchDto } from "~/components/dashboard/MatchLogTable.vue";
 import MatchLogTable from "~/components/dashboard/MatchLogTable.vue";
 import StatisticCard from "~/components/dashboard/StatisticCard.vue";
+import type { MatchDto, SelectOption, StatisticsDto } from "~/types";
 
 const isCreateMatchDialogVisible = ref(false);
 const matchId = ref<string>();
@@ -80,7 +80,7 @@ const currentStreakDescription = computed(() => {
 });
 
 const winRatio = computed(() => {
-  if (!statistics.value?.winRatio) return "";
+  if (!statistics.value?.winRatio) return undefined;
   return (statistics.value?.winRatio * 100).toFixed(2) + "%";
 });
 
@@ -89,7 +89,6 @@ function onAddMatchClick() {
 }
 
 function onEdit(match: MatchDto) {
-  console.log("Edit match", match);
   matchId.value = match.id;
   isCreateMatchDialogVisible.value = true;
 }
@@ -107,15 +106,15 @@ function onCreateMatchDialogHide() {
   <div class="grid gap-4 grid-rows-[auto_auto_1fr] h-full">
     <div class="grid gap-2">
       <p class="text-xl flex items-center">
-        <i class="pi pi-sliders-h mr-3"></i>Parameters
+        <i class="pi pi-sliders-h mr-3" />Parameters
       </p>
       <div class="flex gap-4">
         <div class="flex flex-col items-start gap-2 w-full">
           <label for="opponents">Opponents</label>
           <MultiSelect
+            id="opponents"
             v-model="selectedOpponents"
             class="w-full"
-            id="opponents"
             :options="availablePlayers ?? []"
             option-value="value"
             option-label="label"
@@ -126,19 +125,19 @@ function onCreateMatchDialogHide() {
         <div class="flex flex-col items-start gap-2 w-full">
           <label for="time-frame">Time frame</label>
           <Dropdown
+            id="time-frame"
             v-model="selectedTimeframe"
             :options="availableYears ?? []"
             option-value="value"
             option-label="label"
             class="w-full"
-            id="time-frame"
           />
         </div>
       </div>
     </div>
     <div class="grid gap-2">
       <p class="text-xl flex items-center">
-        <i class="pi pi-sparkles mr-3"></i>Statistics
+        <i class="pi pi-sparkles mr-3" />Statistics
       </p>
       <div class="flex gap-4">
         <StatisticCard
@@ -177,8 +176,8 @@ function onCreateMatchDialogHide() {
   </div>
 
   <CreateMatchDialog
-    :match-id="matchId"
     v-model:visible="isCreateMatchDialogVisible"
+    :match-id="matchId"
     :players="players ?? []"
     @created:match="onMatchCreated"
     @created:player="getPlayers"

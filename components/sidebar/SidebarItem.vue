@@ -1,25 +1,32 @@
 <script setup lang="ts">
-import { useSidebarStore } from '@/stores/sidebar'
-import { useRoute } from 'vue-router'
-import SidebarDropdown from './SidebarDropdown.vue'
+import { useSidebarStore } from "@/stores/sidebar";
+import { useRoute } from "vue-router";
+import SidebarDropdown from "./SidebarDropdown.vue";
+import type { MenuItem } from "~/types";
 
-const sidebarStore = useSidebarStore()
+const sidebarStore = useSidebarStore();
 
-const props = defineProps(['item', 'index'])
-const currentPage = useRoute().name
+const props = defineProps<{
+  item: MenuItem;
+  index: number;
+}>();
+const currentPage = useRoute().name;
 
 interface SidebarItem {
-  label: string
+  label: string;
 }
 
 const handleItemClick = () => {
-  const pageName = sidebarStore.page === props.item.label ? '' : props.item.label
-  sidebarStore.page = pageName
+  const pageName =
+    sidebarStore.page === props.item.label ? "" : props.item.label;
+  sidebarStore.page = pageName;
 
   if (props.item.children) {
-    return props.item.children.some((child: SidebarItem) => sidebarStore.selected === child.label)
+    return props.item.children.some(
+      (child: SidebarItem) => sidebarStore.selected === child.label
+    );
   }
-}
+};
 </script>
 
 <template>
@@ -27,12 +34,12 @@ const handleItemClick = () => {
     <router-link
       :to="item.route"
       class="group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4"
-      @click.prevent="handleItemClick"
       :class="{
-        'bg-graydark dark:bg-meta-4': sidebarStore.page === item.label
+        'bg-graydark dark:bg-meta-4': sidebarStore.page === item.label,
       }"
+      @click.prevent="handleItemClick"
     >
-      <span v-html="item.icon"></span>
+      <component :is="item.icon" />
 
       {{ item.label }}
 
@@ -55,15 +62,16 @@ const handleItemClick = () => {
       </svg>
     </router-link>
 
-    <!-- Dropdown Menu Start -->
-    <div class="translate transform overflow-hidden" v-show="sidebarStore.page === item.label">
+    <div
+      v-show="sidebarStore.page === item.label"
+      class="translate transform overflow-hidden"
+    >
       <SidebarDropdown
         v-if="item.children"
         :items="item.children"
-        :currentPage="currentPage"
+        :current-page="currentPage"
         :page="item.label"
       />
-      <!-- Dropdown Menu End -->
     </div>
   </li>
 </template>
