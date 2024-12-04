@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   ssr: false,
+
   app: {
     head: {
       link: [
@@ -14,15 +15,19 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   devtools: { enabled: true },
+
   devServer: {
     port: 8080,
   },
+
   routeRules: {
     "/api/**": {
       proxy: process.env.API_URL || "http://localhost:3000/**",
     },
   },
+
   modules: [
     "@nuxtjs/tailwindcss",
     "@primevue/nuxt-module",
@@ -32,6 +37,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@nuxt/eslint",
   ],
+
   primevue: {
     importTheme: { from: "@/themes/mytheme.js" },
 
@@ -39,8 +45,12 @@ export default defineNuxtConfig({
       ripple: true,
     },
   },
+
   css: ["~/assets/css/tailwind.css", "primeicons/primeicons.css"],
+
   colorMode: {
     classSuffix: "", // disable the default '-mode' suffix
   },
+
+  compatibilityDate: "2024-12-04",
 });

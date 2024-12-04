@@ -2,7 +2,7 @@
 import SetField from "./SetField.vue";
 
 const modelValue = defineModel<number[] | undefined>();
-const visible = defineModel<boolean>();
+const visible = defineModel<boolean>("visible");
 
 // FUNCTIONS
 function onCancelClick() {
