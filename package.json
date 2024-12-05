@@ -20,6 +20,7 @@
     "@vee-validate/zod": "^4.12.6",
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",
+    "axios": "^1.7.9",
     "defu": "^6.1.4",
     "jwt-decode": "^4.0.0",
     "nuxt": "^3.14.1592",

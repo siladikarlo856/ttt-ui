@@ -2,15 +2,10 @@ import type { CreatePlayerDto } from "~/types";
 
 export const usePlayersService = () => {
   function createPlayer(player: CreatePlayerDto) {
-    return useFetch("/api/players", {
+    return useAuthFetch("/api/players", {
       server: false,
       method: "POST",
       body: JSON.stringify(player),
-      onRequest({ options }) {
-        options.headers = options.headers || {};
-        (options.headers as Record<string, string>).authorization =
-          "Bearer " + useCookie("accessToken").value;
-      },
     });
   }
 

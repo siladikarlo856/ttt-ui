@@ -1,27 +1,55 @@
-import defu from "defu";
-import type { UseFetchOptions } from "nuxt/app";
+import type { UseFetchOptions } from "#app";
+import { defu } from "defu";
 
-export function useAuthFetch<TReq = unknown>(
+export async function useAuthFetch<T>(
   url: string,
-  options: UseFetchOptions<TReq> = {}
+  options: UseFetchOptions<T> = {}
 ) {
-  const token = useCookie("accessToken");
+  const accessToken = useCookie("accessToken");
 
-  const defaults: UseFetchOptions<TReq> = {
-    server: false,
+  const defaults: UseFetchOptions<T> = {
     key: url,
-    headers: {
-      ...options.headers,
-      Authorization: `Bearer ${token.value}`,
-    },
-    async onResponseError({ response }) {
+    headers: accessToken.value
+      ? ({ Authorization: `Bearer ${accessToken.value}` } as Record<
+          string,
+          string
+        >)
+      : ({} as Record<string, string>),
+    onResponse: async ({ response, options }) => {
       if (response.status === 401) {
-        await navigateTo("/signin");
+        try {
+          const newToken = await refreshToken();
+          accessToken.value = newToken;
+
+          options.headers = { Authorization: `Bearer ${newToken}` };
+
+          useFetch(url, options as UseFetchOptions<T>);
+        } catch (error) {
+          console.error("Token refresh failed:", error);
+        }
       }
     },
   };
 
   const mergedOptions = defu(options, defaults);
 
-  return useFetch<TReq>(url, mergedOptions);
+  return useFetch<T>(url, mergedOptions);
+}
+
+async function refreshToken() {
+  const refreshToken = useCookie("refreshToken");
+
+  const { data, status } = await useFetch<{ access: string }>(
+    "/api/token/refresh/",
+    {
+      method: "POST",
+      body: { refresh: refreshToken.value },
+    }
+  );
+
+  if (status.value === "success") {
+    return data.value?.access;
+  } else {
+    throw new Error("Token refresh failed");
+  }
 }

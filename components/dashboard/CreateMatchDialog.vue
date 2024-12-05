@@ -189,7 +189,7 @@ const onSubmit = handleSubmit(async (values) => {
     ? `api/matches/${props.matchId}`
     : "api/matches";
 
-  const { status, error } = await useFetch(requestURL, {
+  const { status, error } = await useAuthFetch(requestURL, {
     method: isEditMode.value ? "PATCH" : "POST",
     params: isEditMode.value ? { id: props.matchId } : {},
     body: {
@@ -200,11 +200,6 @@ const onSubmit = handleSubmit(async (values) => {
       awayPlayerSetsWon: values.awayPlayerSetsWon,
       sets: mappedSetsValue,
       type: values.type,
-    },
-    onRequest({ options }) {
-      options.headers = options.headers || {};
-      (options.headers as Record<string, string>).authorization =
-        "Bearer " + useCookie("accessToken").value;
     },
   });
 
@@ -235,16 +230,8 @@ function onAddSets() {
 
 async function onShow() {
   if (props.matchId) {
-    const { data: matchData } = await useFetch<MatchDto>(
-      `api/matches/${props.matchId}`,
-      {
-        server: false,
-        onRequest({ options }) {
-          options.headers = options.headers || {};
-          (options.headers as Record<string, string>).authorization =
-            "Bearer " + useCookie("accessToken").value;
-        },
-      }
+    const { data: matchData } = await useAuthFetch<MatchDto>(
+      `api/matches/${props.matchId}`
     );
 
     resetForm({

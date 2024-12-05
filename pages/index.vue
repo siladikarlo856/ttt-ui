@@ -31,12 +31,9 @@ const selectedTimeframe = ref<string>(availableYears.value?.[0]?.value ?? "");
 const startDate = computed(() => new Date(selectedTimeframe.value.toString()));
 
 const { data: statistics, execute: getStatistics } =
-  await useFetch<StatisticsDto>("/api/statistics", {
+  await useAuthFetch<StatisticsDto>("/api/statistics", {
     method: "POST",
     body: { startDate: startDate, opponents: selectedOpponents },
-    headers: {
-      Authorization: `Bearer ${useCookie("accessToken").value}`,
-    },
   });
 
 watch(

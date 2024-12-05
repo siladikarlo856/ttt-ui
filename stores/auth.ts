@@ -141,5 +141,6 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading,
     authenticateUser,
     logUserOut,
+    refreshAccessToken,
   };
 });
