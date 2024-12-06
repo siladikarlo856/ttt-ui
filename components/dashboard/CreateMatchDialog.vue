@@ -5,7 +5,7 @@ import { useAuthStore } from "~/stores/auth";
 import CreatePlayerDialog from "./CreatePlayerDialog.vue";
 import CreateSetsDialog from "./CreateSetsDialog.vue";
 import { matchTypes } from "~/utils/constants";
-import type { SelectOption, MatchDto } from "~/types";
+import type { SelectOption, MatchDto, CreateMatchDto } from "~/types";
 
 const props = withDefaults(
   defineProps<{
@@ -19,10 +19,16 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  "created:match": [];
   "click:add-player": [];
   "click:add-sets": [];
   "created:player": [];
+  "create:match": [match: CreateMatchDto];
+  "update:match": [
+    params: {
+      matchId: string;
+      match: CreateMatchDto;
+    }
+  ];
   hide: [];
 }>();
 
@@ -39,9 +45,6 @@ const { isVisible: isCreateSetsDialogVisible, show: showCreateSetsDialog } =
 
 const isEditMode = computed(() => !!props.matchId);
 const submitButtonText = computed(() => (isEditMode.value ? "Update" : "Save"));
-const toastSuccessMessage = computed(() =>
-  isEditMode.value ? "Match log is updated." : "Match log is created."
-);
 
 const { handleSubmit, errors, defineField, resetForm, meta } = useForm({
   validationSchema: toTypedSchema(
@@ -185,39 +188,25 @@ const onSubmit = handleSubmit(async (values) => {
       ];
     }, [] as unknown as setDto[]) ?? [];
 
-  const requestURL = isEditMode.value
-    ? `api/matches/${props.matchId}`
-    : "api/matches";
+  const match = {
+    date: values.date?.toISOString(),
+    homePlayerId: values.homePlayerId,
+    awayPlayerId: values.awayPlayerId,
+    homePlayerSetsWon: values.homePlayerSetsWon,
+    awayPlayerSetsWon: values.awayPlayerSetsWon,
+    sets: mappedSetsValue,
+    type: values.type,
+  };
 
-  const { status, error } = await useAuthFetch(requestURL, {
-    method: isEditMode.value ? "PATCH" : "POST",
-    params: isEditMode.value ? { id: props.matchId } : {},
-    body: {
-      date: values.date?.toISOString(),
-      homePlayerId: values.homePlayerId,
-      awayPlayerId: values.awayPlayerId,
-      homePlayerSetsWon: values.homePlayerSetsWon,
-      awayPlayerSetsWon: values.awayPlayerSetsWon,
-      sets: mappedSetsValue,
-      type: values.type,
-    },
-  });
-
-  if (status.value === "success") {
-    visible.value = false;
-    emit("created:match");
-    toast.add({
-      severity: "success",
-      summary: toastSuccessMessage.value,
-      life: 3000,
-    });
-  } else {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: error.value?.message ?? "An error occurred",
-    });
+  if (isEditMode.value) {
+    emit("update:match", match);
+    return;
   }
+
+  emit("create:match", {
+    matchId: props.matchId,
+    match,
+  });
 });
 
 function onCreateNewPlayerClick() {
@@ -230,9 +219,11 @@ function onAddSets() {
 
 async function onShow() {
   if (props.matchId) {
-    const { data: matchData } = await useAuthFetch<MatchDto>(
+    const { data } = await useAuthFetch<MatchDto>(
       `api/matches/${props.matchId}`
     );
+
+    const matchData = data as Ref<MatchDto>;
 
     resetForm({
       values: {

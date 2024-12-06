@@ -98,6 +98,56 @@ function onMatchCreated() {
 function onCreateMatchDialogHide() {
   matchId.value = "";
 }
+
+const toast = useToast();
+
+async function onCreateMatch(match: any) {
+  const { status, error } = await useAuthFetch(`/api/matches/`, {
+    method: "POST",
+    body: match,
+  });
+
+  if (status.value === "success") {
+    isCreateMatchDialogVisible.value = false;
+    toast.add({
+      severity: "success",
+      summary: "Match log is created",
+      life: 3000,
+    });
+    getMatches();
+    getStatistics();
+  } else {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: error.value?.message ?? "An error occurred",
+    });
+  }
+}
+
+async function onUpdateMatch({ matchId, match }: any) {
+  const { status, error } = await useAuthFetch(`/api/matches/${matchId}`, {
+    method: "PATCH",
+    body: match,
+  });
+
+  if (status.value === "success") {
+    isCreateMatchDialogVisible.value = false;
+    toast.add({
+      severity: "success",
+      summary: "Match log is updated",
+      life: 3000,
+    });
+    getMatches();
+    getStatistics();
+  } else {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: error.value?.message ?? "An error occurred",
+    });
+  }
+}
 </script>
 <template>
   <div class="grid gap-4 grid-rows-[auto_auto_1fr] h-full">
@@ -176,8 +226,9 @@ function onCreateMatchDialogHide() {
     v-model:visible="isCreateMatchDialogVisible"
     :match-id="matchId"
     :players="players ?? []"
-    @created:match="onMatchCreated"
     @created:player="getPlayers"
+    @create:match="onCreateMatch"
+    @update:match="onUpdateMatch"
     @hide="onCreateMatchDialogHide"
   />
 </template>
