@@ -27,11 +27,16 @@ export interface MatchDto {
 }
 
 export interface CreateMatchDto {
-  date: string;
-  homePlayerId: string;
-  awayPlayerId: string;
-  homePlayerSetsWon: number;
-  awayPlayerSetsWon: number;
+  date: string | null;
+  homePlayerId: string | null;
+  awayPlayerId: string | null;
+  homePlayerSetsWon: number | null;
+  awayPlayerSetsWon: number | null;
+  sets: {
+    homePlayerPoints: number;
+    awayPlayerPoints: number;
+  }[];
+  type: MatchType | null;
 }
 
 export interface StatisticsDto {

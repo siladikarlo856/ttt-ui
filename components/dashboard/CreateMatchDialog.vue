@@ -188,8 +188,8 @@ const onSubmit = handleSubmit(async (values) => {
       ];
     }, [] as unknown as setDto[]) ?? [];
 
-  const match = {
-    date: values.date?.toISOString(),
+  const match: CreateMatchDto = {
+    date: values.date?.toISOString() ?? null,
     homePlayerId: values.homePlayerId,
     awayPlayerId: values.awayPlayerId,
     homePlayerSetsWon: values.homePlayerSetsWon,
@@ -199,14 +199,13 @@ const onSubmit = handleSubmit(async (values) => {
   };
 
   if (isEditMode.value) {
-    emit("update:match", match);
+    if (!props.matchId) return;
+
+    emit("update:match", { matchId: props.matchId, match });
     return;
   }
 
-  emit("create:match", {
-    matchId: props.matchId,
-    match,
-  });
+  emit("create:match", match);
 });
 
 function onCreateNewPlayerClick() {
